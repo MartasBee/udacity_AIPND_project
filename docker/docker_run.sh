@@ -8,6 +8,6 @@ docker run --gpus '"device=1","capabilities=compute,graphics,display,utility"' -
   -p 8888:8888 \
   -e DISPLAY=$DISPLAY \
   -v /tmp/.X11-unix:/tmp/.X11-unix \
-  -v /home/martin/devel/github/martasbee/udacity_AIPND_project:/tmp/repo \
-  -v /home/martin/devel/data:/tmp/data \
-  nvcr.io/nvidia/pytorch:21.05-py3 bash
+  -v /home/martin/devel/github/martasbee/udacity_AIPND_project:/workspace/AIPND/repo \
+  -v /home/martin/devel/data:/workspace/AIPND/data \
+  nvcr.io/nvidia/pytorch:21.07-py3 bash
