@@ -3,7 +3,7 @@
 #xhost +
 xhost +si:localuser:$USER
 
-docker run --gpus '"device=1","capabilities=compute,graphics,display,utility"' -it --rm \
+docker run --gpus '"device=0","capabilities=compute,graphics,display,utility"' -it --rm \
   -p 6006:6006 \
   -p 8888:8888 \
   -e DISPLAY=$DISPLAY \
