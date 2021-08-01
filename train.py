@@ -18,7 +18,7 @@ from collections import OrderedDict
 from PIL import Image
 
 from flowers_common import generate_checkpoint_file_name, build_checkpoint_save_path, save_train_checkpoint, \
-                            create_model_densenet121, create_model_resnet18
+                           create_model_densenet121, create_model_resnet18
 
 
 #----------------------------------------------------------------------------------------------------
@@ -73,6 +73,7 @@ def train_model(model_dict, criterion, optimizer, device, \
     
     train_start_time = time.time()
     
+    # move model to target device
     model_dict['model'].to(device)
 
     # setup learning params
@@ -205,6 +206,7 @@ def train_model(model_dict, criterion, optimizer, device, \
     
 # DONE: Do validation on the test set
 def test_trained_model(model_dict, criterion, device, test_dataloader):
+    # move model to target device
     model_dict['model'].to(device)
 
     test_loss = 0

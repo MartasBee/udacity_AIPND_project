@@ -143,15 +143,16 @@ def load_category_names(cat_name_file='cat_to_name.json'):
     return cat_to_name
 
 
-def class_to_name_lookup(class_names_dict, predicted_classes):
-    # convert predicted_classes from torch.Tensor to list if neccessary
-    if type(predicted_classes) == torch.Tensor:
-        predicted_classes = predicted_classes.squeeze().tolist()
-        
+def class_to_name_lookup(class_names_dict, predicted_classes_list):
+    '''
+    @param class_names_dict dictionary which maps class numbers to names
+    @param predicted_classes_list list of classes (numbers with type str)
+    @return list of labels
+    '''
     labels = []
-    for c in predicted_classes:
-        labels.append(cat_to_name.get(str(c)))
-        
+    for c in predicted_classes_list:
+        labels.append(class_names_dict.get(str(c)))
+    
     return labels
 
 
