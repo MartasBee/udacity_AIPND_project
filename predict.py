@@ -256,7 +256,7 @@ def main():
     if args.verbose:
         print("==== ==== ==== ==== ====")
         print('NN MODEL:')
-        print(model_dict['model'])
+        print(loaded_model_dict['model'])
     
     
     # Use GPU if available and if allowed by paramter "GPU"
@@ -271,13 +271,13 @@ def main():
         
         
     # predict class idx of given flower image
-    predP, predCI = predict(image_to_predict, model_dict['model'], device, topk=top_k)
+    predP, predCI = predict(image_to_predict, loaded_model_dict['model'], device, topk=top_k)
     predCL, predN = pred_class_idx_to_flower_name(loaded_checkpoint['class_idx_to_class'], cat_to_name_dict, predCI)
     
    
     print("==== ==== ==== ==== ==== ==== ==== ====")
     print("Input image: ", image_to_predict)
-    if not labels:
+    if not predN:
         for cl, pr in zip(predCL, predP):
             print("Prediction:  class {:>3}   probability: {:.3f}".format(cl, pr))
     else:
