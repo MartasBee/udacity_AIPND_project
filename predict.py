@@ -115,6 +115,7 @@ def imshow_tensor(image_tensor):
 
     
 def show_probablities_chart(probabilities, classes):
+    
     # get list of labels
     labels = class_to_name_lookup(cat_to_name, classes)
     
@@ -128,13 +129,16 @@ def show_probablities_chart(probabilities, classes):
 
 #----------------------------------------------------------------------------------------------------
 
-def predict(image_path, model, device, topk=5):
+def predict(image_path_or_tensor, model, device, topk=5):
     ''' Predict the class (or classes) of an image using a trained deep learning model.
     '''
     
     # DONE: Implement the code to predict the class from an image file
     
-    input_data = process_image_via_torch(image_path)
+    if type(image_path_or_tensor) == torch.Tensor:
+        input_data = image_tensor
+    else:
+        input_data = process_image_via_torch(image_path_or_tensor)
     
     # move model to target device
     model.to(device)
@@ -145,13 +149,14 @@ def predict(image_path, model, device, topk=5):
     with torch.no_grad():
 
         if type(input_data) != torch.Tensor:
+            print("processing non-tensor array to tensor")
             input_data = torch.from_numpy(input_data)
             input_data.unsqueeze_(0)
             input_data = input_data.float()
         
         # move data to device
         input_data = input_data.to(device)
-        
+                
         logps = model.forward(input_data)
         
         # get top topk classes
@@ -183,21 +188,25 @@ def parse_arguments():
     parser.add_argument('image_to_predict',
                         help='The path to image for prediction',
                         action='store', type=str)
+    
     parser.add_argument('model_checkpoint',
                         help='The path to trained network checkpoint',
                         action='store', type=str)
-    parser.add_argument('-c', '--category_names',
-                        help='Path to category-to-name file',
-                        default='./cat_to_name.json',
-                        action='store', type=str, required=False)
+    
     parser.add_argument('-t', '--top_k',
                         choices=range(1, 11),
                         default='1',
                         help='Return top K most likely classes',
                         action='store', type=int, required=False)
+    
+    parser.add_argument('-c', '--category_names',
+                        help='Path to category-to-name file',
+                        action='store', type=str, required=False)
+    
     parser.add_argument('-g', '--gpu',
                         help='Inference on GPU, if available',
                         action='store_true', required=False)    
+    
     parser.add_argument('-v', '--verbose',
                         help='Show extra logs',
                         action='store_true', required=False)
@@ -242,10 +251,12 @@ def main():
         
     cat_to_name_dict = {}
     # check if provided category file exists
-    if not os.path.exists(category_names):
+    if not category_names:
+        print('INFO: The \'category_names\' NOT specified.')
+    elif not os.path.exists(category_names):
         print('WARNING: The \'category_names\' specified ({}) does not exist'.format(category_names))
     else:
-        cat_to_name_dict = load_category_names()
+        cat_to_name_dict = load_category_names(category_names)
 
         
     # load checkpoint and build the model

@@ -28,10 +28,12 @@ def generate_checkpoint_file_name(filename='checkpoint.pth', epoch=None):
     return filename
     
     
-def build_checkpoint_save_path(root_data_dir='../data/_trained_models/', store_in_pwd=False):
+def build_checkpoint_save_path(root_data_dir, store_in_pwd=False):
     # if user wanna store data in current PWD
     if store_in_pwd:
         checkpoint_root = './'
+    elif not root_data_dir:
+        return None
     else:
         checkpoint_root = root_data_dir
     # checkpoint's dir
@@ -65,6 +67,7 @@ def load_checkpoint(checkpoint_path):
     checkpoint = torch.load(checkpoint_path)
         
     return checkpoint
+
 
 def recreate_model_from_checkpoint(checkpoint):
     # based on model name, stored in checkpoint, recreate the model
@@ -113,6 +116,7 @@ def create_model_densenet121(hidden=256):
 
 
 #----------------------------------------------------------------------------------------------------
+
 def create_model_resnet18(hidden=256):
     # load pretrained model from torchvision
     model = models.resnet18(pretrained=True)
@@ -142,7 +146,7 @@ def create_model_resnet18(hidden=256):
 # LOAD CATEGORY NAMES FILE
 #----------------------------------------------------------------------------------------------------
 
-def load_category_names(cat_name_file='cat_to_name.json'):
+def load_category_names(cat_name_file):
     with open(cat_name_file, 'r') as f:
         cat_to_name = json.load(f)
     

@@ -216,7 +216,7 @@ def test_trained_model(model_dict, criterion, device, test_dataloader):
 
     test_loss = 0
     accuracy = 0
-
+        
     # switch model to evaluation mode
     model_dict['model'].eval()
     # with gradient calculation turned off
@@ -233,7 +233,7 @@ def test_trained_model(model_dict, criterion, device, test_dataloader):
             top_p, top_class = ps.topk(1, dim=1)
             equals = top_class == labels.view(*top_class.shape)
             accuracy += torch.mean(equals.type(torch.FloatTensor)).item()
-
+            
     print('===============================================================================')
     print("Test loss: {:.3f}.. ".format(test_loss/len(test_dataloader)),
           "Test accuracy: {:.3f}".format(accuracy/len(test_dataloader)))
@@ -251,31 +251,37 @@ def parse_arguments():
     parser.add_argument('data_directory',
                         help='The path to directory with training data',
                         action='store', type=str)
+    
+    parser.add_argument('-s', '--save_dir',
+                        help='Path to dir to store checkpoints',
+                        action='store', type=str, required=False)
+    
     parser.add_argument('-a', '--arch',
                         help='Architecture: Densenet121 or Resnet18',
                         choices=['Densenet121', 'Resnet18'],
                         default='Resnet18',
                         action='store', type=str, required=False)
-    parser.add_argument('-u', '--hidden_units',
-                        help='Number of neurons in hidden layer',
-                        default='256',
-                        action='store', type=int, required=False)
+    
     parser.add_argument('-l', '--learning_rate',
                         help='Learning rate',
                         default='0.005',
                         action='store', type=float, required=False)
+    
+    parser.add_argument('-u', '--hidden_units',
+                        help='Number of neurons in hidden layer',
+                        default='256',
+                        action='store', type=int, required=False)
+    
     parser.add_argument('-e', '--epochs',
                         choices=range(1, 11),
                         default='5',
                         help='Number of epochs',
                         action='store', type=int, required=False)
+    
     parser.add_argument('-g', '--gpu',
                         help='Train on GPU, if available',
                         action='store_true', required=False)    
-    parser.add_argument('-s', '--save_dir',
-                        help='Path to dir to store checkpoints',
-                        default='../data/_trained_models/',
-                        action='store', type=str, required=False)
+    
     parser.add_argument('-v', '--verbose',
                         help='Show extra logs',
                         action='store_true', required=False)
@@ -320,7 +326,7 @@ def main():
         exit()
         
     # check if provided directory for storing checkpoints exists, if no, create it
-    if not os.path.isdir(save_dir):
+    if save_dir and not os.path.isdir(save_dir):
         os.makedirs(save_dir)
         
     
