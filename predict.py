@@ -53,6 +53,7 @@ def process_image_via_numpy(image):
     return np_image
 
 
+# credits: https://discuss.pytorch.org/t/pytorch-pil-to-tensor-and-vice-versa/6312/9
 def process_image_via_torch(image):
     
     with Image.open(image) as im:
