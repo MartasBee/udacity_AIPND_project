@@ -46,12 +46,14 @@ def build_checkpoint_save_path(root_data_dir='../data/_trained_models/', store_i
 
 #----------------------------------------------------------------------------------------------------
 # for saving model after each epoch
-def save_train_checkpoint(model_dict, epoch, checkpoint_path):
+def save_train_checkpoint(model_dict, optimizer, epoch, idx_to_class, checkpoint_path):
    
     checkpoint = {'model_name': model_dict['name'],
                   'model_state_dict': model_dict['model'].state_dict(),
                   'classifier_hidden': model_dict['hidden'],
-                  'epoch': epoch}
+                  'optimizer_state_dict': optimizer.state_dict(),
+                  'epoch': epoch,
+                  'class_idx_to_class': idx_to_class}
     
     torch.save(checkpoint, checkpoint_path)
 
@@ -61,20 +63,24 @@ def save_train_checkpoint(model_dict, epoch, checkpoint_path):
 def load_checkpoint(checkpoint_path):
     # load required checkpoint
     checkpoint = torch.load(checkpoint_path)
-    
+        
+    return checkpoint
+
+def recreate_model_from_checkpoint(checkpoint):
     # based on model name, stored in checkpoint, recreate the model
     # Densenet121 based model
     if checkpoint['model_name'] == 'flowers_classifier_model__densenet':
-        model_dict = create_model_densenet121(checkpoint['classifier_hidden'])
+        loaded_model_dict = create_model_densenet121(checkpoint['classifier_hidden'])
     # Resnet18 based model
     elif checkpoint['model_name'] == 'flowers_classifier_model__resnet':
-        model_dict = create_model_resnet18(checkpoint['classifier_hidden'])
+        loaded_model_dict = create_model_resnet18(checkpoint['classifier_hidden'])
     else:
         print("ERROR: Unknown model name loaded from given checkpoint...")
         exit()
     
-    model_dict['model'].load_state_dict(checkpoint['model_state_dict'])
-    return model_dict
+    loaded_model_dict['model'].load_state_dict(checkpoint['model_state_dict'])
+    
+    return loaded_model_dict
 
 
 #----------------------------------------------------------------------------------------------------
@@ -143,7 +149,7 @@ def load_category_names(cat_name_file='cat_to_name.json'):
     return cat_to_name
 
 
-def class_to_name_lookup(class_names_dict, predicted_classes_list):
+def class_to_name_lookup(class_to_names_dict, predicted_classes_list):
     '''
     @param class_names_dict dictionary which maps class numbers to names
     @param predicted_classes_list list of classes (numbers with type str)
@@ -151,8 +157,17 @@ def class_to_name_lookup(class_names_dict, predicted_classes_list):
     '''
     labels = []
     for c in predicted_classes_list:
-        labels.append(class_names_dict.get(str(c)))
-    
+        labels.append(class_to_names_dict.get(str(c)))
+        
     return labels
+
+
+def pred_class_idx_to_flower_name(dataset_class_idx_to_class_list, class_to_names_dict, predicted_class_idx_list):
+    predCL = []
+    for ci in predicted_class_idx_list:
+        predCL.append(dataset_class_idx_to_class_list[ci])
+    predN = class_to_name_lookup(class_to_names_dict, predCL)
+    
+    return predCL, predN
 
 

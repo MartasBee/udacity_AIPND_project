@@ -61,14 +61,15 @@ def load_train_data(rootdir='../data/'):
     valid_dataloader = torch.utils.data.DataLoader(valid_dataset, batch_size=64, shuffle=True)
     test_dataloader  = torch.utils.data.DataLoader(test_dataset,  batch_size=64)
     
-    return train_dataloader, valid_dataloader, test_dataloader
+    return train_dataloader, valid_dataloader, test_dataloader, train_dataset.classes
 
 
 #----------------------------------------------------------------------------------------------------
 
 def train_model(model_dict, criterion, optimizer, device, \
                 train_dataloader, valid_dataloader, \
-                num_epochs=5, num_valid_steps=10, \
+                num_epochs=5, \
+                train_idx_to_class=None, \
                 checkpoints_save_dir=None):
     
     train_start_time = time.time()
@@ -78,7 +79,7 @@ def train_model(model_dict, criterion, optimizer, device, \
 
     # setup learning params
     epochs = num_epochs
-    validation_step = num_valid_steps
+    validation_step = 10
     steps = 0
     running_loss = 0    
 
@@ -189,14 +190,18 @@ def train_model(model_dict, criterion, optimizer, device, \
             
             if checkpoints_save_dir is not None:
                 save_train_checkpoint(model_dict,
-                                      epoch, 
+                                      optimizer,
+                                      epoch,
+                                      train_idx_to_class,
                                       checkpoints_save_dir+generate_checkpoint_file_name(epoch=epoch))
 
     time_elapsed = time.time() - train_start_time
     
     if checkpoints_save_dir is not None:
         save_train_checkpoint(model_dict,
-                              epoch, 
+                              optimizer,
+                              epochs,
+                              train_idx_to_class,
                               checkpoints_save_dir+generate_checkpoint_file_name())
     
     print('===============================================================================')
@@ -320,7 +325,7 @@ def main():
         
     
     # load datasets
-    train_loader, valid_loader, test_loader = load_train_data(data_directory)
+    train_loader, valid_loader, test_loader, train_class_idx_to_class = load_train_data(data_directory)
     
     
     # create model & appropriate optimizer
@@ -357,6 +362,7 @@ def main():
     train_model(model_dict, criterion, optimizer, device, 
                 train_loader, valid_loader,
                 num_epochs=epochs,
+                train_idx_to_class=train_class_idx_to_class,
                 checkpoints_save_dir=build_checkpoint_save_path(save_dir))
         
     

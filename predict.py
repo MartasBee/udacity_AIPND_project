@@ -17,8 +17,9 @@ import argparse
 from collections import OrderedDict
 from PIL import Image
 
-from flowers_common import load_checkpoint, create_model_densenet121, create_model_resnet18, \
-                           load_category_names, class_to_name_lookup
+from flowers_common import load_checkpoint, recreate_model_from_checkpoint, \
+                           create_model_densenet121, create_model_resnet18, \
+                           load_category_names, class_to_name_lookup, pred_class_idx_to_flower_name
 
 
 #----------------------------------------------------------------------------------------------------
@@ -248,7 +249,9 @@ def main():
 
         
     # load checkpoint and build the model
-    model_dict = load_checkpoint(model_checkpoint)
+    loaded_checkpoint = load_checkpoint(model_checkpoint)
+    
+    loaded_model_dict = recreate_model_from_checkpoint(loaded_checkpoint)
     
     if args.verbose:
         print("==== ==== ==== ==== ====")
@@ -267,24 +270,18 @@ def main():
         print('Device selected for training: ', device)
         
         
-    # predict class of given flower image
-    probs, classes = predict(image_to_predict, model_dict['model'], device, topk=top_k)
-
+    # predict class idx of given flower image
+    predP, predCI = predict(image_to_predict, model_dict['model'], device, topk=top_k)
+    predCL, predN = pred_class_idx_to_flower_name(loaded_checkpoint['class_idx_to_class'], cat_to_name_dict, predCI)
     
-    # transform class to name of the flower
-    if cat_to_name_dict:
-        labels = class_to_name_lookup(cat_to_name_dict, classes)
-    else:
-        labels = []
-
-    
+   
     print("==== ==== ==== ==== ==== ==== ==== ====")
     print("Input image: ", image_to_predict)
     if not labels:
-        for cl, pr in zip(classes, probs):
+        for cl, pr in zip(predCL, predP):
             print("Prediction:  class {:>3}   probability: {:.3f}".format(cl, pr))
     else:
-        for cl, pr, la in zip(classes, probs, labels):
+        for cl, pr, la in zip(predCL, predP, predN):
             print("Prediction:  class {:>3}   probability: {:.3f}   label: {}".format(cl, pr, la))
     print("==== ==== ==== ==== ==== ==== ==== ====")
     
